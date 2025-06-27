@@ -6,10 +6,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 /**Deinifir la ruta para los endpoints*/
 @RequestMapping("/api/usuarios")
 public class UsuarioControlador {
+
     /*Inyeccion del servicio*/
     @Autowired
     private UsuarioServicios servicio;
@@ -19,6 +22,12 @@ public class UsuarioControlador {
     public Usuario crearUsuario(@RequestBody Usuario usuario) {
         return servicio.guardarUsuario(usuario);
     }
+    /*Endpoint para obtener todos los usuarios*/
+    @GetMapping
+    public List<Usuario> obtenerTodos() {
+        return servicio.obtenerTodos();
+    }
+
     /*Endpoint para obtener el usuario por id*/
     @RequestMapping("/{id}")
     public ResponseEntity<Usuario> obtenerUsuarioPorId(@PathVariable Long id) {
