@@ -9,51 +9,60 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-/**Deinifir la ruta para los endpoints*/
-@RequestMapping("/api/usuarios")
+@RequestMapping("api/usuarios")
+// Habilitar CORS globalmente para este controlador
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 public class UsuarioControlador {
 
-    /*Inyeccion del servicio*/
     @Autowired
     private UsuarioServicios servicio;
 
-    /*Crear los endpoints*/
-    @PostMapping
-    public Usuario crearUsuario(@RequestBody Usuario usuario) {
-        return servicio.guardarUsuario(usuario);
-    }
-    /*Endpoint para obtener todos los usuarios*/
+    // Obtener todos los usuarios
     @GetMapping
     public List<Usuario> obtenerTodos() {
         return servicio.obtenerTodos();
     }
 
-    /*Endpoint para obtener el usuario por id*/
-    @RequestMapping("/{id}")
-    public ResponseEntity<Usuario> obtenerUsuarioPorId(@PathVariable Long id) {
+    // Crear un usuario
+    @PostMapping
+    public Usuario createUsuario(@RequestBody Usuario usuario) {
+        return servicio.guardarUsuario(usuario);
+    }
+
+    // Obtener un usuario por ID
+    @GetMapping("/{id}")
+    public ResponseEntity<Usuario> obtenerUsuario(@PathVariable Long id) {
         Usuario usuario = (Usuario) servicio.obtenerPorId(id);
         if (usuario != null) {
             return ResponseEntity.ok(usuario);
-        } else {
-            return ResponseEntity.notFound().build();
         }
+        return ResponseEntity.notFound().build();
     }
 
-    /*Actualizar Usuario*/
+    // Editar un usuario por ID
     @PutMapping("/{id}")
-    public ResponseEntity<Usuario> actualizarUsuario(@PathVariable Long id, @RequestBody Usuario usuario) {
-        Usuario usuarioActualizado = servicio.actualizarUsuario(id, usuario);
-        if (usuarioActualizado != null) {
-            return ResponseEntity.ok(usuarioActualizado);
-        } else {
+    public ResponseEntity<Usuario> editarUsuario(@PathVariable Long id, @RequestBody Usuario usuarioDetalles) {
+        Usuario usuarioExistente = (Usuario) servicio.obtenerPorId(id);
+
+        if (usuarioExistente == null) {
             return ResponseEntity.notFound().build();
         }
+
+        // Actualizar los datos del usuario existente
+        usuarioExistente.setNombre(usuarioDetalles.getNombre());
+        usuarioExistente.setEmail(usuarioDetalles.getEmail());
+
+        // Guardar los cambios
+        Usuario usuarioActualizado = servicio.guardarUsuario(usuarioExistente);
+
+        return ResponseEntity.ok(usuarioActualizado);
     }
 
-    /*Eliminar Usuario*/
+    // Eliminar un usuario por ID
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminarUsuario(@PathVariable Long id) {
         servicio.eliminarUsuario(id);
         return ResponseEntity.noContent().build();
     }
 }
+
