@@ -10,7 +10,7 @@ import javax.sql.DataSource;
 @Configuration
 public class DatabaseConfig {
 
-    @Value("${DATABASE_URL:jdbc:postgresql://localhost:5432/api_crud?user=postgres&password=your_local_password}")
+    @Value("${DATABASE_URL:jdbc:postgresql://localhost:5432/api_crud?user=postgres&password=admin}")
     private String databaseUrl;
 
     @Bean
