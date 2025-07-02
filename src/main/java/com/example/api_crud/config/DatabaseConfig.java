@@ -15,15 +15,20 @@ public class DatabaseConfig {
 
     @Bean
     public DataSource dataSource() {
-        // Transformar postgresql:// a jdbc:postgresql:// y añadir puerto 5432 si no está presente
-        String jdbcUrl = databaseUrl.startsWith("postgresql://")
-                ? "jdbc:postgresql://" + databaseUrl.substring("postgresql://".length())
-                : databaseUrl;
-        if (!jdbcUrl.contains(":")) {
-            // Añadir puerto 5432 si no está especificado
-            int dbNameIndex = jdbcUrl.lastIndexOf("/");
-            if (dbNameIndex != -1) {
-                jdbcUrl = jdbcUrl.substring(0, dbNameIndex) + ":5432" + jdbcUrl.substring(dbNameIndex);
+        String jdbcUrl = databaseUrl;
+        if (databaseUrl.startsWith("postgresql://")) {
+            // Transformar postgresql:// a jdbc:postgresql://
+            jdbcUrl = "jdbc:postgresql://" + databaseUrl.substring("postgresql://".length());
+            // Añadir puerto :5432 después del host, antes del nombre de la base de datos
+            int credentialsEnd = jdbcUrl.indexOf("@");
+            int dbNameStart = jdbcUrl.lastIndexOf("/");
+            if (credentialsEnd != -1 && dbNameStart != -1 && dbNameStart > credentialsEnd) {
+                String hostPart = jdbcUrl.substring(0, dbNameStart);
+                String dbPart = jdbcUrl.substring(dbNameStart);
+                // Verificar si ya hay un puerto especificado
+                if (!hostPart.substring(credentialsEnd).contains(":")) {
+                    jdbcUrl = hostPart + ":5432" + dbPart;
+                }
             }
         }
         return DataSourceBuilder.create()
